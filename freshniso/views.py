@@ -28,7 +28,7 @@ class ItemDetailView(DetailView):
 
 
 def add_to_cart(request, slug):
-    item = get_object_or_404(Item, slug)
+    item = Item.objects.get(slug=slug)
     order_item = OrderItem.objects.create(item=item)
     order_qs = Order.objects.filter(user=request.user, ordered=False)
     if order_qs.exists():
@@ -40,4 +40,4 @@ def add_to_cart(request, slug):
             ordered_date = timezone.now()
             order = Order.objects.create(user=request.user, ordered_date=ordered_date)
             order.items.add(order_item)
-            redirect("product", slug=slug)
+    return redirect("product", slug=slug)
