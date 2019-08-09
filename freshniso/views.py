@@ -1,8 +1,11 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Item, OrderItem, Order
-from django.views.generic import ListView, DetailView
+from django.views.generic import ListView, DetailView, View
 from django.utils import timezone
 from django.contrib import messages
+from django.core.exceptions import ObjectDoesNotExist
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 
 # Create your views here.
@@ -25,11 +28,22 @@ class HomeView(ListView):
     template_name = 'freshniso/home.html'
 
 
+class OrderSummaryView(LoginRequiredMixin, View):
+    def get(self, *args, **kwargs):
+        try:
+            order = Order.objects.get(user=self.request.user, ordered=False)
+        except ObjectDoesNotExist:
+            messages.error(self.request, "You do not have an active order")
+            return redirect("/")
+        return render(self.request, 'freshniso/order_summary.html', {'order': order})
+
+
 class ItemDetailView(DetailView):
     model = Item
     template_name = 'freshniso/product.html'
 
 
+@login_required
 def add_to_cart(request, slug):
     item = get_object_or_404(Item, slug=slug)
     order_item, created = OrderItem.objects.get_or_create(item=item, user=request.user, ordered=False)
@@ -51,6 +65,7 @@ def add_to_cart(request, slug):
     return redirect("product", slug=slug)
 
 
+@login_required
 def remove_from_cart(request, slug):
     item = get_object_or_404(Item, slug=slug)
     order_qs = Order.objects.filter(user=request.user, ordered=False)
