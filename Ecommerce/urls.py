@@ -24,9 +24,3 @@ urlpatterns = [
     path('accounts/', include('allauth.urls')),
     path('', include('freshniso.urls'))
 ]
-
-if settings.DEBUG:
-    import debug_toolbar
-    urlpatterns += [
-        path('__debug__/', include(debug_toolbar.urls))
-    ]

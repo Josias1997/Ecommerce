@@ -2,11 +2,19 @@
   <dictionary name="pc">
     <words>
       <w>allauth</w>
+      <w>djangorestframework</w>
       <w>ecommerce</w>
+      <w>examplecode</w>
       <w>freshniso</w>
+      <w>gunicorn</w>
       <w>lconf</w>
+      <w>mysqlclient</w>
+      <w>paypal</w>
       <w>pythonpath</w>
+      <w>pytz</w>
       <w>socialaccount</w>
+      <w>sqlparse</w>
+      <w>whitenoise</w>
     </words>
   </dictionary>
 </component>
