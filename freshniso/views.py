@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Item, OrderItem, Order
+from .models import Item, OrderItem, Order, BillingAddress
 from django.views.generic import ListView, DetailView, View
 from django.utils import timezone
 from django.contrib import messages
@@ -27,11 +27,36 @@ class CheckoutView(View):
         }
         return render(self.request, "freshniso/checkout.html", context)
 
-    def post(self):
+    def post(self, *args, **kwargs):
         form = CheckoutForm(self.request.POST or None)
-        if form.is_valid():
-            print("The form is valid")
+        try:
+            order = Order.Objects.get(self.request.user, ordered=False)
+            if form.is_valid():
+                street_address = form.cleaned_data.get('street_address')
+                apartment_address = form.cleaned_data.get('apartment_address')
+                country = form.cleaned_data.get('country')
+                zip = form.cleaned_data.get('zip')
+                # TODO: Add functionality for these fields
+                # same_shipping_address = form.cleaned_data.get('same_billing_address')
+                # save_info = form.cleaned_data.get('save_info')
+                payment_option = form.cleaned_data.get('payment_option')
+                billing_address = BillingAddress(
+                    user=self.request.user,
+                    street_address=street_address,
+                    apartment_address=apartment_address,
+                    country=country,
+                    zip=zip
+                )
+                billing_address.save()
+                order.billing_address = billing_address
+                order.save()
+                # Add a redirect to the selected payment option.
+                return redirect("checkout")
+            messages.warning(self.request, "Failed checkout")
             return redirect("checkout")
+        except ObjectDoesNotExist:
+            messages.error(self.request, "You don't have an active order")
+            return redirect('order-summary')
 
 
 class HomeView(ListView):
